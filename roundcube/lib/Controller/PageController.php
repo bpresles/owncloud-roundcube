@@ -40,11 +40,15 @@ class PageController extends \OCP\AppFramework\Controller
 	public function index() {
 		$l = \OC::$server->getL10N($this->appName);
 		\OC::$server->getNavigationManager()->setActiveEntry($this->appName);
-		$user = \OC::$server->getUserSession()->getUser()->getUID();
+        $user = \OC::$server->getUserSession()->getUser();
+		$username = $user->getUID();
 
-		if (strpos($user, '@') === false) {
-			Util::writeLog($this->appName, __METHOD__ . ": username ($user) is not an email address.", Util::WARN);
-			return new TemplateResponse($this->appName, "part.error.noemail", array('user' => $user));
+		if (strpos($username, '@') === false) {
+		    $useremail = $user->getEMailAddress();
+		    if (strpos($useremail, '@') === false) {
+                Util::writeLog($this->appName, __METHOD__ . ": username ($user) is not an email address and doesn't have a personal email adress configured.", Util::WARN);
+                return new TemplateResponse($this->appName, "part.error.noemail", array('user' => $username));
+            }
 		}
 		if (!AuthHelper::login()) {
 			return new TemplateResponse($this->appName, "part.error.login", array());

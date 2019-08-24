@@ -85,7 +85,12 @@ class AuthHelper
         $b64crypted = \OC::$server->getRequest()->getCookie(self::COOKIE_RC_STRING);
         $encPrivKey = \OC::$server->getSession()->get(self::SESSION_RC_PRIVKEY);
         $password = Crypto::privateDecrypt($b64crypted, $encPrivKey, $passphrase);
-        $username = \OC::$server->getUserSession()->getUser()->getUID();
+        $user = \OC::$server->getUserSession()->getUser();
+        $username = $user->getUID();
+
+        if (strpos($username, '@') === false) {
+            $username = $user->getEMailAddress();
+        }
         $backLogin = new BackLogin($username, $password);
         return $backLogin->login();
     }
